@@ -5,9 +5,9 @@ import com.phishguard.exception.BadRequestException;
 import com.phishguard.model.Alert;
 import com.phishguard.model.ScanHistory;
 import com.phishguard.model.User;
-import com.phishguard.repository.AlertRepository;
 import com.phishguard.repository.ScanHistoryRepository;
 import com.phishguard.repository.UserRepository;
+import com.phishguard.service.AlertsService;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +24,7 @@ public class DashboardController {
 
     private final UserRepository userRepository;
     private final ScanHistoryRepository scanHistoryRepository;
-    private final AlertRepository alertRepository;
+    private final AlertsService alertsService;
 
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<DashboardStats>> getStats() {
@@ -42,8 +42,11 @@ public class DashboardController {
         // Recent scans
         List<ScanHistory> recent = scanHistoryRepository.findTop5ByUserIdOrderByScannedAtDesc(user.getId());
 
-        // Latest critical alerts
-        List<Alert> latestAlerts = alertRepository.findBySeverityAndIsActiveTrue(Alert.Severity.CRITICAL);
+        // Latest critical alerts from dynamic feed
+        List<Alert> latestAlerts = alertsService.getAlertsBySeverity("CRITICAL");
+        if (latestAlerts.isEmpty()) {
+            latestAlerts = alertsService.getAllAlerts();
+        }
 
         // Cybersecurity tips rotation
         String[] tips = {
@@ -69,6 +72,31 @@ public class DashboardController {
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(stats, "Dashboard stats retrieved."));
+    }
+
+    @GetMapping("/map-hotspots")
+    public ResponseEntity<ApiResponse<List<MapHotspot>>> getMapHotspots() {
+        List<MapHotspot> hotspots = List.of(
+            new MapHotspot("Jamtara", 24.13, 86.80, 480, "Aadhaar KYC SMS Scams", "CRITICAL"),
+            new MapHotspot("Mumbai", 19.07, 72.87, 290, "UPI Reward Scams", "HIGH"),
+            new MapHotspot("Delhi", 28.70, 77.10, 245, "Fake HDFC Portals", "HIGH"),
+            new MapHotspot("Bengaluru", 12.97, 77.59, 190, "Fake Courier Fees", "MEDIUM"),
+            new MapHotspot("Hyderabad", 17.38, 78.48, 170, "Govt Scheme Subsidies", "MEDIUM")
+        );
+        return ResponseEntity.ok(ApiResponse.success(hotspots, "Map hotspots retrieved."));
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class MapHotspot {
+        private String city;
+        private double lat;
+        private double lng;
+        private int threatCount;
+        private String topScam;
+        private String severity;
     }
 
     @Data

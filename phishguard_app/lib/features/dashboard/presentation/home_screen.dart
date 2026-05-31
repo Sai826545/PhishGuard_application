@@ -7,6 +7,7 @@ import 'package:phishguard_app/core/constants/app_strings.dart';
 import 'package:phishguard_app/core/network/api_client.dart';
 import 'package:phishguard_app/core/storage/secure_storage.dart';
 import 'package:phishguard_app/core/widgets/pg_widgets.dart';
+import 'package:phishguard_app/features/dashboard/presentation/scam_map_widget.dart';
 
 // Dashboard repository
 final dashboardProvider = FutureProvider<Map<String, dynamic>>((ref) async {
@@ -132,6 +133,11 @@ class HomeScreen extends ConsumerWidget {
 
                     // Cyber tip banner
                     _CyberTipBanner(tip: data['dailyCybertip'] as String? ?? ''),
+
+                    const SizedBox(height: 20),
+
+                    // Live Threat Map
+                    const ScamMapWidget(),
 
                     const SizedBox(height: 20),
 

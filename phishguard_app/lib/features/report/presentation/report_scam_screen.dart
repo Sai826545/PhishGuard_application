@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import 'package:phishguard_app/core/constants/app_colors.dart';
 import 'package:phishguard_app/core/constants/app_strings.dart';
 import 'package:phishguard_app/core/network/api_client.dart';
@@ -20,6 +22,7 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
   final _descCtrl = TextEditingController();
   String _selectedCategory = 'BANK_SCAM';
   bool _isLoading = false;
+  XFile? _screenshotFile;
 
   final List<_Category> _categories = const [
     _Category('BANK_SCAM', '🏦 Bank Scam', Icons.account_balance_outlined),
@@ -39,17 +42,40 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery);
+    if (file != null) {
+      setState(() => _screenshotFile = file);
+    }
+  }
+
   Future<void> _submitReport() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
       final client = ref.read(apiClientProvider);
+      
+      String? screenshotUrl;
+      if (_screenshotFile != null) {
+        final formData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            _screenshotFile!.path,
+            filename: _screenshotFile!.name,
+          ),
+        });
+        final uploadResponse = await client.post('/report/upload', data: formData);
+        screenshotUrl = uploadResponse.data['data']['url'];
+      }
+
       await client.post('/report', data: {
         'category': _selectedCategory,
         'content': _contentCtrl.text.trim(),
         'phoneNumber': _phoneCtrl.text.trim(),
         'description': _descCtrl.text.trim(),
+        'screenshotUrl': screenshotUrl,
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -60,6 +86,7 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
         _contentCtrl.clear();
         _phoneCtrl.clear();
         _descCtrl.clear();
+        setState(() => _screenshotFile = null);
       }
     } catch (e) {
       if (mounted) {
@@ -191,6 +218,49 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
                   return null;
                 },
               ).animate().fadeIn(delay: 400.ms),
+
+              const SizedBox(height: AppSizes.paddingMD),
+
+              // Screenshot Attachment
+              Text('Attach Screenshot (optional)', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+                    border: Border.all(color: AppColors.border, width: 0.5),
+                  ),
+                  child: _screenshotFile == null
+                      ? const Column(
+                          children: [
+                            Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary, size: 36),
+                            SizedBox(height: 8),
+                            Text('Tap to select a screenshot', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            const Icon(Icons.insert_drive_file_outlined, color: AppColors.primary, size: 28),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _screenshotFile!.name,
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontFamily: 'monospace'),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.clear, color: AppColors.danger, size: 18),
+                              onPressed: () => setState(() => _screenshotFile = null),
+                            ),
+                          ],
+                        ),
+                ),
+              ).animate().fadeIn(delay: 450.ms),
 
               const SizedBox(height: AppSizes.paddingXL),
 

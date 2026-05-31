@@ -6,6 +6,7 @@ import 'package:phishguard_app/features/auth/presentation/splash_screen.dart';
 import 'package:phishguard_app/features/auth/presentation/onboarding_screen.dart';
 import 'package:phishguard_app/features/auth/presentation/login_screen.dart';
 import 'package:phishguard_app/features/auth/presentation/signup_screen.dart';
+import 'package:phishguard_app/features/auth/presentation/forgot_password_screen.dart';
 import 'package:phishguard_app/features/dashboard/presentation/home_screen.dart';
 import 'package:phishguard_app/features/scanner/presentation/url_scan_screen.dart';
 import 'package:phishguard_app/features/scanner/presentation/qr_scan_screen.dart';
@@ -27,7 +28,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = await storage.isLoggedIn();
       final path = state.uri.path;
 
-      final publicRoutes = ['/splash', '/onboarding', '/login', '/signup'];
+      final publicRoutes = ['/splash', '/onboarding', '/login', '/signup', '/forgot-password'];
 
       if (!isLoggedIn && !publicRoutes.contains(path)) {
         return '/login';
@@ -40,6 +41,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (_, __) => const SignupScreen()),
+      GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
 
       // Main Shell (Bottom Nav)
       ShellRoute(

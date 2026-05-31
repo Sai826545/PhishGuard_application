@@ -90,4 +90,54 @@ public class AuthService {
 
         return AuthResponse.of(newAccessToken, newRefreshToken, user);
     }
+
+    // In-memory OTP cache: Email -> OtpData
+    private static final java.util.concurrent.ConcurrentHashMap<String, OtpData> otpCache = 
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static class OtpData {
+        String code;
+        long expiryTime;
+
+        OtpData(String code, long expiryTime) {
+            this.code = code;
+            this.expiryTime = expiryTime;
+        }
+    }
+
+    public void sendPasswordResetOtp(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new BadRequestException("Email is not registered.");
+        }
+        String otpCode = String.format("%06d", new java.util.Random().nextInt(1000000));
+        long expiryTime = System.currentTimeMillis() + (10 * 60 * 1000);
+        otpCache.put(email, new OtpData(otpCode, expiryTime));
+
+        System.out.println("==================================================");
+        System.out.println("🔐 PHISHGUARD PASSWORD RESET SERVICE");
+        System.out.println("Recipient Email: " + email);
+        System.out.println("Your 6-digit OTP code is: " + otpCode);
+        System.out.println("Expiry: 10 minutes");
+        System.out.println("==================================================");
+    }
+
+    @Transactional
+    public void resetPassword(String email, String otp, String newPassword) {
+        OtpData otpData = otpCache.get(email);
+        if (otpData == null) {
+            throw new BadRequestException("No verification request found for this email.");
+        }
+        if (System.currentTimeMillis() > otpData.expiryTime) {
+            otpCache.remove(email);
+            throw new BadRequestException("Verification code has expired.");
+        }
+        if (!otpData.code.equals(otp)) {
+            throw new BadRequestException("Invalid verification code.");
+        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        otpCache.remove(email);
+    }
 }

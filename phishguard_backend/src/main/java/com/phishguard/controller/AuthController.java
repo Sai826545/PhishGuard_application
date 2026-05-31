@@ -44,8 +44,16 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(
             @RequestParam String email) {
-        // TODO: Implement email OTP in Phase 3+
+        authService.sendPasswordResetOtp(email);
         return ResponseEntity.ok(
-                ApiResponse.success("OTP sent", "If this email is registered, an OTP will be sent."));
+                ApiResponse.success("OTP sent", "A 6-digit OTP code has been sent to your email."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(
+            @Valid @RequestBody com.phishguard.dto.request.ResetPasswordRequest request) {
+        authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+        return ResponseEntity.ok(
+                ApiResponse.success("Password reset", "Your password has been successfully reset."));
     }
 }

@@ -90,13 +90,17 @@ class _SmsScanScreenState extends ConsumerState<SmsScanScreen> {
     ref.listen(scanStateProvider, (_, next) {
       if (next is ScanDone) {
         context.go('/scan/result', extra: next.result.toJson());
-        ref.read(scanStateProvider.notifier).reset();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) ref.read(scanStateProvider.notifier).reset();
+        });
       }
       if (next is ScanFailed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.message), backgroundColor: AppColors.danger),
         );
-        ref.read(scanStateProvider.notifier).reset();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) ref.read(scanStateProvider.notifier).reset();
+        });
       }
     });
 

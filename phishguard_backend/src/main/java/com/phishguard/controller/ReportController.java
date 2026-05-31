@@ -19,6 +19,37 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<java.util.Map<String, String>>> uploadScreenshot(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new com.phishguard.exception.BadRequestException("File is empty.");
+        }
+        try {
+            String uploadDir = System.getProperty("user.dir") + java.io.File.separator + "uploads";
+            java.io.File dir = new java.io.File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String filename = java.util.UUID.randomUUID().toString() + extension;
+            java.io.File destFile = new java.io.File(dir, filename);
+            file.transferTo(destFile);
+
+            String fileUrl = "/api/uploads/" + filename;
+            java.util.Map<String, String> response = new java.util.HashMap<>();
+            response.put("url", fileUrl);
+
+            return ResponseEntity.ok(ApiResponse.success(response, "Screenshot uploaded."));
+        } catch (java.io.IOException e) {
+            throw new com.phishguard.exception.BadRequestException("Failed to upload file: " + e.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<ScamReport>> submitReport(
             @Valid @RequestBody ReportRequest request) {

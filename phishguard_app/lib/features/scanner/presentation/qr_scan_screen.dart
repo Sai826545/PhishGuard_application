@@ -46,17 +46,25 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     ref.listen(scanStateProvider, (_, next) {
       if (next is ScanDone) {
         context.go('/scan/result', extra: next.result.toJson());
-        ref.read(scanStateProvider.notifier).reset();
-        setState(() => _scanned = false);
-        _controller.start();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(scanStateProvider.notifier).reset();
+            setState(() => _scanned = false);
+            _controller.start();
+          }
+        });
       }
       if (next is ScanFailed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.message), backgroundColor: AppColors.danger),
         );
-        ref.read(scanStateProvider.notifier).reset();
-        setState(() => _scanned = false);
-        _controller.start();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(scanStateProvider.notifier).reset();
+            setState(() => _scanned = false);
+            _controller.start();
+          }
+        });
       }
     });
 

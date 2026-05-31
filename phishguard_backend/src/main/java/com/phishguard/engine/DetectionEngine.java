@@ -24,6 +24,7 @@ public class DetectionEngine {
     private final SslChecker sslChecker;
     private final UrlShortenerDetector shortenerDetector;
     private final IndiaSpecificDetector indiaSpecificDetector;
+    private final RdapService rdapService;
 
     public DetectionResult analyze(String input) {
         List<String> reasons = new ArrayList<>();
@@ -36,7 +37,7 @@ public class DetectionEngine {
         if (trustedDomainChecker.isTrusted(domain)) {
             reasons.add("✅ Domain is a verified trusted website.");
             score = Math.max(0, score - 50);
-            return buildResult(score, domain, reasons, true, false, url);
+            return buildResult(score, domain, reasons, true, false, url, -1);
         }
 
         // 2. Blacklist check
@@ -101,6 +102,16 @@ public class DetectionEngine {
             reasons.add("⚠️ Suspicious top-level domain (.xyz, .tk, .ml, .ga) often used in phishing.");
         }
 
+        // 12. Domain Age Check (WHOIS)
+        int domainAgeDays = rdapService.getDomainAgeDays(domain);
+        if (domainAgeDays >= 0 && domainAgeDays < 30) {
+            score += 40;
+            reasons.add("🔴 Domain is extremely new (" + domainAgeDays + " days old) — typical of disposable phishing sites.");
+        } else if (domainAgeDays >= 30 && domainAgeDays < 180) {
+            score += 15;
+            reasons.add("⚠️ Domain is relatively new (" + domainAgeDays + " days old). Use caution.");
+        }
+
         // Cap score at 100
         score = Math.min(score, 100);
 
@@ -108,18 +119,18 @@ public class DetectionEngine {
             reasons.add("✅ No known threats detected. URL appears safe.");
         }
 
-        return buildResult(score, domain, reasons, false, blacklist.isBlacklisted(), url);
+        return buildResult(score, domain, reasons, false, blacklist.isBlacklisted(), url, domainAgeDays);
     }
 
     private DetectionResult buildResult(int score, String domain, List<String> reasons,
-                                        boolean trusted, boolean blacklisted, String url) {
+                                        boolean trusted, boolean blacklisted, String url, int domainAgeDays) {
         return DetectionResult.builder()
                 .riskScore(score)
                 .status(DetectionResult.scoreToStatus(score))
                 .domainName(domain)
                 .sslStatus(sslChecker.isHttps(url))
                 .redirectCount(estimateRedirects(url))
-                .domainAgeDays(-1) // Requires WHOIS integration (Phase 3+)
+                .domainAgeDays(domainAgeDays)
                 .blacklisted(blacklisted)
                 .trusted(trusted)
                 .reasons(reasons)

@@ -24,9 +24,20 @@ public class ReportService {
     public ScamReport submitReport(ReportRequest request) {
         User user = getCurrentUser();
 
+        ScamReport.Category category;
+        try {
+            if (request.getCategory() == null) {
+                throw new BadRequestException("Scam category is required.");
+            }
+            category = ScamReport.Category.valueOf(request.getCategory().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid scam category: " + request.getCategory() + 
+                ". Allowed categories are: BANK_SCAM, UPI_SCAM, COURIER_SCAM, GOVT_SCAM, SMS_SCAM, EMAIL_SCAM, OTHER");
+        }
+
         ScamReport report = ScamReport.builder()
                 .user(user)
-                .category(ScamReport.Category.valueOf(request.getCategory().toUpperCase()))
+                .category(category)
                 .content(request.getContent())
                 .phoneNumber(request.getPhoneNumber())
                 .description(request.getDescription())
