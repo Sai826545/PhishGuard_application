@@ -60,6 +60,7 @@ com\phishguard\engine\IndiaSpecificDetector$IndiaResult.class
 com\phishguard\controller\ReportController.class
 com\phishguard\security\UserDetailsServiceImpl.class
 com\phishguard\controller\DashboardController$MapHotspot$MapHotspotBuilder.class
+com\phishguard\service\ScanService$MlResponse.class
 com\phishguard\config\WebConfig.class
 com\phishguard\dto\request\ScanRequest.class
 com\phishguard\service\AuthService$OtpData.class

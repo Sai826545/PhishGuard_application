@@ -19,13 +19,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ScanService {
+
+    @Value("${ml.service.url}")
+    private String mlServiceUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     private final DetectionEngine detectionEngine;
     private final ScanHistoryRepository scanHistoryRepository;
@@ -65,8 +76,11 @@ public class ScanService {
                 }
             }
         } else {
-            // No URLs — just analyze keywords in the SMS text
-            worst = detectionEngine.analyze(content);
+            // No URLs — call ML service for text message, fallback to rules
+            worst = callMlService(content);
+            if (worst == null) {
+                worst = detectionEngine.analyze(content);
+            }
         }
 
         return persistAndBuild(user, content, ScanHistory.ScanType.SMS, worst);
@@ -86,10 +100,48 @@ public class ScanService {
                 }
             }
         } else {
-            worst = detectionEngine.analyze(content);
+            // No URLs — call ML service for text message, fallback to rules
+            worst = callMlService(content);
+            if (worst == null) {
+                worst = detectionEngine.analyze(content);
+            }
         }
 
         return persistAndBuild(user, content, ScanHistory.ScanType.EMAIL, worst);
+    }
+
+    private DetectionResult callMlService(String content) {
+        try {
+            String url = mlServiceUrl + "/predict";
+            Map<String, String> request = Map.of("content", content);
+            MlResponse response = restTemplate.postForObject(url, request, MlResponse.class);
+            if (response != null) {
+                log.info(">>> [ML Model Scan] Text successfully audited by Naive Bayes classifier! Risk Score: {}", response.getRiskScore());
+                return DetectionResult.builder()
+                        .riskScore(response.getRiskScore())
+                        .status(response.getStatus())
+                        .reasons(response.getAiReasons())
+                        .sslStatus(false)
+                        .redirectCount(0)
+                        .domainAgeDays(-1)
+                        .blacklisted(false)
+                        .trusted(false)
+                        .domainName("N/A")
+                        .build();
+            }
+        } catch (Exception e) {
+            log.error("ML service call failed, falling back to rule-based engine: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MlResponse {
+        private int riskScore;
+        private String status;
+        private List<String> aiReasons;
     }
 
     private ScanResponse persistAndBuild(User user, String content,

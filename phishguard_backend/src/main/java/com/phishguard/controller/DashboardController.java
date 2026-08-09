@@ -4,8 +4,10 @@ import com.phishguard.dto.response.ApiResponse;
 import com.phishguard.exception.BadRequestException;
 import com.phishguard.model.Alert;
 import com.phishguard.model.ScanHistory;
+import com.phishguard.model.ScamReport;
 import com.phishguard.model.User;
 import com.phishguard.repository.ScanHistoryRepository;
+import com.phishguard.repository.ScamReportRepository;
 import com.phishguard.repository.UserRepository;
 import com.phishguard.service.AlertsService;
 import lombok.*;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -25,6 +30,7 @@ public class DashboardController {
     private final UserRepository userRepository;
     private final ScanHistoryRepository scanHistoryRepository;
     private final AlertsService alertsService;
+    private final ScamReportRepository scamReportRepository;
 
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<DashboardStats>> getStats() {
@@ -76,14 +82,112 @@ public class DashboardController {
 
     @GetMapping("/map-hotspots")
     public ResponseEntity<ApiResponse<List<MapHotspot>>> getMapHotspots() {
-        List<MapHotspot> hotspots = List.of(
-            new MapHotspot("Jamtara", 24.13, 86.80, 480, "Aadhaar KYC SMS Scams", "CRITICAL"),
-            new MapHotspot("Mumbai", 19.07, 72.87, 290, "UPI Reward Scams", "HIGH"),
-            new MapHotspot("Delhi", 28.70, 77.10, 245, "Fake HDFC Portals", "HIGH"),
-            new MapHotspot("Bengaluru", 12.97, 77.59, 190, "Fake Courier Fees", "MEDIUM"),
-            new MapHotspot("Hyderabad", 17.38, 78.48, 170, "Govt Scheme Subsidies", "MEDIUM")
-        );
-        return ResponseEntity.ok(ApiResponse.success(hotspots, "Map hotspots retrieved."));
+        Map<String, double[]> coordinatesRegistry = new HashMap<>();
+        coordinatesRegistry.put("DELHI", new double[]{28.70, 77.10});
+        coordinatesRegistry.put("MUMBAI", new double[]{19.07, 72.87});
+        coordinatesRegistry.put("JAMTARA", new double[]{24.13, 86.80});
+        coordinatesRegistry.put("BENGALURU", new double[]{12.97, 77.59});
+        coordinatesRegistry.put("HYDERABAD", new double[]{17.38, 78.48});
+        coordinatesRegistry.put("CHENNAI", new double[]{13.08, 80.27});
+        coordinatesRegistry.put("KOLKATA", new double[]{22.57, 88.36});
+        coordinatesRegistry.put("PUNE", new double[]{18.52, 73.85});
+        coordinatesRegistry.put("AHMEDABAD", new double[]{23.02, 72.57});
+
+        Map<String, MapHotspot> hotspotsMap = new HashMap<>();
+        hotspotsMap.put("JAMTARA", new MapHotspot("Jamtara", 24.13, 86.80, 480, "Aadhaar KYC SMS Scams", "CRITICAL"));
+        hotspotsMap.put("MUMBAI", new MapHotspot("Mumbai", 19.07, 72.87, 290, "UPI Reward Scams", "HIGH"));
+        hotspotsMap.put("DELHI", new MapHotspot("Delhi", 28.70, 77.10, 245, "Fake HDFC Portals", "HIGH"));
+        hotspotsMap.put("BENGALURU", new MapHotspot("Bengaluru", 12.97, 77.59, 190, "Fake Courier Fees", "MEDIUM"));
+        hotspotsMap.put("HYDERABAD", new MapHotspot("Hyderabad", 17.38, 78.48, 170, "Govt Scheme Subsidies", "MEDIUM"));
+
+        try {
+            List<ScamReport> reports = scamReportRepository.findAll();
+            for (ScamReport report : reports) {
+                String city = report.getCity();
+                if (city == null || city.trim().isEmpty() || "N/A".equalsIgnoreCase(city)) {
+                    continue;
+                }
+                String cityKey = city.trim().toUpperCase();
+
+                double lat = report.getLatitude() != null ? report.getLatitude() : 0.0;
+                double lng = report.getLongitude() != null ? report.getLongitude() : 0.0;
+                if (lat == 0.0 && lng == 0.0) {
+                    double[] coords = coordinatesRegistry.get(cityKey);
+                    if (coords != null) {
+                        lat = coords[0];
+                        lng = coords[1];
+                    } else {
+                        lat = 20.5937;
+                        lng = 78.9629;
+                    }
+                }
+
+                String reportCategoryStr = report.getCategory() != null ? report.getCategory().name() : "OTHER";
+                String userFriendlyScam = formatCategoryName(reportCategoryStr);
+
+                if (hotspotsMap.containsKey(cityKey)) {
+                    MapHotspot existing = hotspotsMap.get(cityKey);
+                    existing.setThreatCount(existing.getThreatCount() + 1);
+                    existing.setTopScam(userFriendlyScam);
+                    existing.setSeverity(calculateSeverity(existing.getThreatCount()));
+                } else {
+                    String titleCaseCity = toTitleCase(city);
+                    MapHotspot newHotspot = new MapHotspot(
+                        titleCaseCity,
+                        lat,
+                        lng,
+                        1,
+                        userFriendlyScam,
+                        "MEDIUM"
+                    );
+                    hotspotsMap.put(cityKey, newHotspot);
+                }
+            }
+        } catch (Exception e) {
+            // Fallback gracefully if database table hasn't updated/synced yet
+        }
+
+        List<MapHotspot> list = new ArrayList<>(hotspotsMap.values());
+        return ResponseEntity.ok(ApiResponse.success(list, "Map hotspots retrieved."));
+    }
+
+    private String formatCategoryName(String category) {
+        if (category == null) return "Unknown Scam";
+        switch (category.toUpperCase()) {
+            case "BANK_SCAM": return "Bank Phishing Portal";
+            case "UPI_SCAM": return "UPI Reward Scam";
+            case "COURIER_SCAM": return "Fake Courier Fee";
+            case "GOVT_SCAM": return "Govt Scheme Impersonation";
+            case "SMS_SCAM": return "SMS Phishing Scam";
+            case "EMAIL_SCAM": return "Email Phishing Scam";
+            default: return "Online Security Threat";
+        }
+    }
+
+    private String calculateSeverity(int count) {
+        if (count >= 300) return "CRITICAL";
+        if (count >= 200) return "HIGH";
+        if (count > 5) return "HIGH";
+        if (count >= 3) return "MEDIUM";
+        return "MEDIUM";
+    }
+
+    private String toTitleCase(String text) {
+        if (text == null || text.isEmpty()) return text;
+        StringBuilder sb = new StringBuilder();
+        boolean nextTitleCase = true;
+        for (char c : text.toCharArray()) {
+            if (Character.isSpaceChar(c)) {
+                nextTitleCase = true;
+            } else if (nextTitleCase) {
+                c = Character.toTitleCase(c);
+                nextTitleCase = false;
+            } else {
+                c = Character.toLowerCase(c);
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     @Data

@@ -38,6 +38,13 @@ public class ScamReport {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(length = 100)
+    private String city;
+
+    private Double latitude;
+
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status status = Status.PENDING;

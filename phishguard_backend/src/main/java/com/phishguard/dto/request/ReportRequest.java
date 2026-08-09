@@ -13,4 +13,7 @@ public class ReportRequest {
     private String phoneNumber;    // Scam phone number
     private String description;    // Description of the scam
     private String screenshotUrl;  // Screenshot URL (uploaded separately)
+    private String city;
+    private Double latitude;
+    private Double longitude;
 }

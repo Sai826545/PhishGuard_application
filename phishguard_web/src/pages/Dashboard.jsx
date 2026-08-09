@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { PGCard, SeverityChip, StatusChip } from '../components/PGWidgets';
-import ScamMapWidget from '../components/ScamMapWidget';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -125,46 +124,41 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Grid: Map & Feeds */}
+      {/* Daily Security Tip Banner */}
+      {stats.dailyCybertip && (
+        <PGCard
+          style={{
+            background: 'linear-gradient(135deg, var(--card), var(--surface))',
+            borderLeft: '4px solid var(--primary)',
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'flex-start',
+            marginBottom: '30px',
+          }}
+        >
+          <Lightbulb size={24} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--primary)', marginBottom: '4px' }}>
+              Daily Security Tip
+            </h4>
+            <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: '1.5' }}>
+              {stats.dailyCybertip.replace('💡', '').trim()}
+            </p>
+          </div>
+        </PGCard>
+      )}
+
+      {/* Main Grid: Activity & Feeds */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
           gap: '30px',
         }}
         className="dashboard-columns-responsive"
       >
-        {/* Left: Map */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <ScamMapWidget />
-          
-          {/* Tip Card */}
-          {stats.dailyCybertip && (
-            <PGCard
-              style={{
-                background: 'linear-gradient(135deg, var(--card), var(--surface))',
-                borderLeft: '4px solid var(--primary)',
-                display: 'flex',
-                gap: '16px',
-                alignItems: 'flex-start',
-              }}
-            >
-              <Lightbulb size={24} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--primary)', marginBottom: '4px' }}>
-                  Daily Security Tip
-                </h4>
-                <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: '1.5' }}>
-                  {stats.dailyCybertip.replace('💡', '').trim()}
-                </p>
-              </div>
-            </PGCard>
-          )}
-        </div>
-
-        {/* Right: Alerts & Recent */}
+        {/* Left Column: Recent Scans */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-          {/* Recent Scans */}
           <PGCard>
             <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Recent Scan Activity</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -227,8 +221,10 @@ const Dashboard = () => {
               )}
             </div>
           </PGCard>
+        </div>
 
-          {/* Latest Threat Advisories */}
+        {/* Right Column: Threat Advisories */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
           <PGCard>
             <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Latest Security Feeds</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>

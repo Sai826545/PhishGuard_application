@@ -42,6 +42,29 @@ const ScanResult = () => {
   const statusColor = isSafe ? 'var(--safe)' : isSuspicious ? 'var(--warning)' : 'var(--danger)';
   const statusBg = isSafe ? 'var(--safe-bg)' : isSuspicious ? 'var(--warning-bg)' : 'var(--danger-bg)';
 
+  // Helper to parse aiReasons robustly from string/array formats
+  const getReasonsArray = (reasons) => {
+    if (!reasons) return [];
+    if (Array.isArray(reasons)) return reasons;
+    if (typeof reasons === 'string') {
+      try {
+        const parsed = JSON.parse(reasons);
+        if (Array.isArray(parsed)) return parsed;
+        return [parsed.toString()];
+      } catch (e) {
+        if (reasons.includes(',')) {
+          return reasons.split(',').map(r => r.trim()).filter(Boolean);
+        }
+        return [reasons];
+      }
+    }
+    return [];
+  };
+
+  const reasonsArray = getReasonsArray(result.aiReasons);
+  const blacklisted = result.blacklisted ?? (result.resultStatus === 'DANGEROUS');
+  const trusted = result.trusted ?? (result.resultStatus === 'SAFE' && (result.riskScore ?? 0) < 10);
+
   const handleCopyResult = () => {
     const text = `PhishGuard Scan Result: ${result.resultStatus}\n` +
       `Risk Score: ${result.riskScore}/100\n` +
@@ -50,8 +73,8 @@ const ScanResult = () => {
       `- SSL Certificate: ${result.sslStatus ? 'Valid HTTPS' : 'Missing/HTTP'}\n` +
       `- Domain Age: ${result.domainAgeDays >= 0 ? `${result.domainAgeDays} days` : 'N/A'}\n` +
       `- Redirects: ${result.redirectCount}\n` +
-      `- Blacklist Status: ${result.blacklisted ? 'Listed' : 'Clean'}\n` +
-      `Why: \n${(result.aiReasons || []).join('\n')}`;
+      `- Blacklist Status: ${blacklisted ? 'Listed' : 'Clean'}\n` +
+      `Why: \n${reasonsArray.join('\n')}`;
 
     navigator.clipboard.writeText(text);
     alert('Scan results copied to clipboard.');
@@ -238,23 +261,23 @@ const ScanResult = () => {
           {/* Blacklisted */}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
             <span style={{ color: 'var(--text-secondary)' }}>Blacklist DB Status</span>
-            <span style={{ fontWeight: '600', color: result.blacklisted ? 'var(--danger)' : 'var(--safe)' }}>
-              {result.blacklisted ? 'Reported Phishing Portal' : 'Not Blacklisted'}
+            <span style={{ fontWeight: '600', color: blacklisted ? 'var(--danger)' : 'var(--safe)' }}>
+              {blacklisted ? 'Reported Phishing Portal' : 'Not Blacklisted'}
             </span>
           </div>
 
           {/* Whitelisted */}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
             <span style={{ color: 'var(--text-secondary)' }}>Trusted Domain list</span>
-            <span style={{ fontWeight: '600', color: result.trusted ? 'var(--safe)' : 'var(--text-secondary)' }}>
-              {result.trusted ? 'Whitelisted Safe Brand' : 'Not Whitelisted'}
+            <span style={{ fontWeight: '600', color: trusted ? 'var(--safe)' : 'var(--text-secondary)' }}>
+              {trusted ? 'Whitelisted Safe Brand' : 'Not Whitelisted'}
             </span>
           </div>
         </div>
       </PGCard>
 
       {/* Security Analysis Explanations / Rules matches */}
-      {result.aiReasons && result.aiReasons.length > 0 && (
+      {reasonsArray.length > 0 && (
         <PGCard>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
             <AlertCircle size={16} style={{ color: 'var(--primary)' }} />
@@ -263,7 +286,7 @@ const ScanResult = () => {
           <div style={{ height: '1px', background: 'var(--border)', marginBottom: '14px' }} />
 
           <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {result.aiReasons.map((reason, idx) => (
+            {reasonsArray.map((reason, idx) => (
               <li
                 key={idx}
                 style={{

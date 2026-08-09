@@ -23,6 +23,19 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
   String _selectedCategory = 'BANK_SCAM';
   bool _isLoading = false;
   XFile? _screenshotFile;
+  String _selectedCity = 'Delhi';
+
+  final List<Map<String, dynamic>> _cities = const [
+    {'name': 'Delhi', 'lat': 28.70, 'lng': 77.10},
+    {'name': 'Mumbai', 'lat': 19.07, 'lng': 72.87},
+    {'name': 'Jamtara', 'lat': 24.13, 'lng': 86.80},
+    {'name': 'Bengaluru', 'lat': 12.97, 'lng': 77.59},
+    {'name': 'Hyderabad', 'lat': 17.38, 'lng': 78.48},
+    {'name': 'Chennai', 'lat': 13.08, 'lng': 80.27},
+    {'name': 'Kolkata', 'lat': 22.57, 'lng': 88.36},
+    {'name': 'Pune', 'lat': 18.52, 'lng': 73.85},
+    {'name': 'Ahmedabad', 'lat': 23.02, 'lng': 72.57},
+  ];
 
   final List<_Category> _categories = const [
     _Category('BANK_SCAM', '🏦 Bank Scam', Icons.account_balance_outlined),
@@ -68,12 +81,17 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
         screenshotUrl = uploadResponse.data['data']['url'];
       }
 
+      final cityData = _cities.firstWhere((c) => c['name'] == _selectedCity);
+
       await client.post('/report', data: {
         'category': _selectedCategory,
         'content': _contentCtrl.text.trim(),
         'phoneNumber': _phoneCtrl.text.trim(),
         'description': _descCtrl.text.trim(),
         'screenshotUrl': screenshotUrl,
+        'city': _selectedCity,
+        'latitude': cityData['lat'],
+        'longitude': cityData['lng'],
       });
 
       if (mounted) {
@@ -86,7 +104,10 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
         _contentCtrl.clear();
         _phoneCtrl.clear();
         _descCtrl.clear();
-        setState(() => _screenshotFile = null);
+        setState(() {
+          _screenshotFile = null;
+          _selectedCity = 'Delhi';
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -180,8 +201,44 @@ class _ReportScamScreenState extends ConsumerState<ReportScamScreen> {
                 }).toList(),
               ).animate().fadeIn(delay: 100.ms),
 
+              // City Dropdown Selector
               const SizedBox(height: AppSizes.paddingLG),
+              Text('Scam Location (City)', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: _selectedCity,
+                dropdownColor: AppColors.card,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.map_outlined, color: AppColors.textSecondary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+                    borderSide: const BorderSide(color: AppColors.border, width: 0.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+                    borderSide: const BorderSide(color: AppColors.border, width: 0.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                items: _cities.map((city) {
+                  return DropdownMenuItem<String>(
+                    value: city['name'] as String,
+                    child: Text(city['name'] as String),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _selectedCity = val);
+                  }
+                },
+              ).animate().fadeIn(delay: 150.ms),
 
+              const SizedBox(height: AppSizes.paddingLG),
               // URL / Content
               Text('Scam URL or Content (optional)', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 10),

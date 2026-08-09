@@ -42,6 +42,9 @@ public class ReportService {
                 .phoneNumber(request.getPhoneNumber())
                 .description(request.getDescription())
                 .screenshotUrl(request.getScreenshotUrl())
+                .city(request.getCity())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
                 .status(ScamReport.Status.PENDING)
                 .build();
 

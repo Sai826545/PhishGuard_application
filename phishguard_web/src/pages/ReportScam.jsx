@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Upload, Send, Trash2, Camera, AlertCircle } from 'lucide-react';
+import { ShieldAlert, Upload, Send, Trash2, Camera, AlertCircle, Map } from 'lucide-react';
 import api from '../services/api';
 import { PGCard, PGButton } from '../components/PGWidgets';
 
@@ -14,6 +14,19 @@ const ReportScam = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [city, setCity] = useState('Delhi');
+
+  const cities = [
+    { name: 'Delhi', lat: 28.70, lng: 77.10 },
+    { name: 'Mumbai', lat: 19.07, lng: 72.87 },
+    { name: 'Jamtara', lat: 24.13, lng: 86.80 },
+    { name: 'Bengaluru', lat: 12.97, lng: 77.59 },
+    { name: 'Hyderabad', lat: 17.38, lng: 78.48 },
+    { name: 'Chennai', lat: 13.08, lng: 80.27 },
+    { name: 'Kolkata', lat: 22.57, lng: 88.36 },
+    { name: 'Pune', lat: 18.52, lng: 73.85 },
+    { name: 'Ahmedabad', lat: 23.02, lng: 72.57 },
+  ];
 
   const categories = [
     { value: 'BANK_SCAM', label: '💳 Banking Phishing Portal' },
@@ -70,6 +83,8 @@ const ReportScam = () => {
         setUploadingFile(false);
       }
 
+      const selectedCityObj = cities.find(c => c.name === city) || { lat: null, lng: null };
+
       // 2. Submit scam report JSON payload
       const reportPayload = {
         category,
@@ -77,6 +92,9 @@ const ReportScam = () => {
         phoneNumber: phoneNumber.trim() || 'N/A',
         description: description.trim(),
         screenshotUrl,
+        city: city,
+        latitude: selectedCityObj.lat,
+        longitude: selectedCityObj.lng,
       };
 
       await api.post('/report', reportPayload);
@@ -87,6 +105,7 @@ const ReportScam = () => {
       setContent('');
       setPhoneNumber('');
       setDescription('');
+      setCity('Delhi');
       setFile(null);
       setFilePreview(null);
     } catch (err) {
@@ -163,6 +182,33 @@ const ReportScam = () => {
                 {categories.map((cat) => (
                   <option key={cat.value} value={cat.value} style={{ background: 'var(--card)', color: 'var(--text-primary)' }}>
                     {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* City */}
+          <div className="pg-input-wrapper" style={{ margin: 0 }}>
+            <label>Scam Location (City)</label>
+            <div className="pg-input-container">
+              <Map size={18} style={{ color: 'var(--text-hint)' }} />
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  width: '100%',
+                  cursor: 'pointer',
+                }}
+              >
+                {cities.map((c) => (
+                  <option key={c.name} value={c.name} style={{ background: 'var(--card)', color: 'var(--text-primary)' }}>
+                    {c.name}
                   </option>
                 ))}
               </select>
