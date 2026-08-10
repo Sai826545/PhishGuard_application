@@ -23,7 +23,7 @@ Make sure the following software is installed globally on your machine:
 Before launching the backend api, make sure MySQL is running and setup a database with these settings:
 *   **Database Name**: `phishguard_db`
 *   **Username**: `root`
-*   **Password**: `simatsucks`
+*   **Password**: `password`
 *(Note: If you have a different root password, update it in `phishguard_backend/src/main/resources/application.properties`)*
 
 ---
