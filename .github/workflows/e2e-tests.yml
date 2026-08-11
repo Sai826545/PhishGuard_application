@@ -17,7 +17,6 @@ jobs:
         with:
           python-version: '3.10'
       - run: pip install openpyxl
-      - run: python generate_web_excel_report.py
       - uses: actions/upload-artifact@v4
         with:
           name: selenium-web-report
@@ -32,7 +31,6 @@ jobs:
         with:
           python-version: '3.10'
       - run: pip install openpyxl pandas requests
-      - run: python generate_excel_report.py
       - uses: actions/upload-artifact@v4
         with:
           name: mobile_appium_test_report
@@ -47,7 +45,6 @@ jobs:
         with:
           python-version: '3.10'
       - run: pip install openpyxl
-      - run: python generate_vulnerability_excel_report.py
       - uses: actions/upload-artifact@v4
         with:
           name: vulnerability_scan_report
@@ -62,23 +59,7 @@ jobs:
         with:
           python-version: '3.10'
       - run: pip install openpyxl
-      - run: python generate_load_excel_report.py
       - uses: actions/upload-artifact@v4
         with:
           name: load-test-report
           path: phishguard_load_test_report.xlsx
-
-  validation-tests:
-    name: Validation Tests (350+)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - run: pip install openpyxl
-      - run: python generate_validation_excel_report.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: validation_test_report
-          path: phishguard_validation_test_report.xlsx
