@@ -77,7 +77,7 @@ public class ScanService {
             }
         } else {
             // No URLs — call ML service for text message, fallback to rules
-            worst = callMlService(content);
+            worst = callMlService(content, "SMS");
             if (worst == null) {
                 worst = detectionEngine.analyze(content);
             }
@@ -101,7 +101,7 @@ public class ScanService {
             }
         } else {
             // No URLs — call ML service for text message, fallback to rules
-            worst = callMlService(content);
+            worst = callMlService(content, "EMAIL");
             if (worst == null) {
                 worst = detectionEngine.analyze(content);
             }
@@ -110,13 +110,16 @@ public class ScanService {
         return persistAndBuild(user, content, ScanHistory.ScanType.EMAIL, worst);
     }
 
-    private DetectionResult callMlService(String content) {
+    private DetectionResult callMlService(String content, String type) {
         try {
             String url = mlServiceUrl + "/predict";
-            Map<String, String> request = Map.of("content", content);
+            Map<String, String> request = Map.of(
+                "content", content,
+                "type", type
+            );
             MlResponse response = restTemplate.postForObject(url, request, MlResponse.class);
             if (response != null) {
-                log.info(">>> [ML Model Scan] Text successfully audited by Naive Bayes classifier! Risk Score: {}", response.getRiskScore());
+                log.info(">>> [ML Model Scan] {} successfully audited by Naive Bayes classifier! Risk Score: {}", type, response.getRiskScore());
                 return DetectionResult.builder()
                         .riskScore(response.getRiskScore())
                         .status(response.getStatus())

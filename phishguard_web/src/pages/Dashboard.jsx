@@ -11,6 +11,7 @@ import {
   UserCheck,
   ChevronRight,
   Lightbulb,
+  Trash2,
 } from 'lucide-react';
 import api from '../services/api';
 import { PGCard, SeverityChip, StatusChip } from '../components/PGWidgets';
@@ -34,6 +35,21 @@ const Dashboard = () => {
     };
     fetchStats();
   }, []);
+
+  const handleDeleteScan = async (e, scanId) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this scan record?')) return;
+    try {
+      await api.delete(`/history/${scanId}`);
+      setStats((prev) => ({
+        ...prev,
+        recentScans: prev.recentScans.filter((scan) => scan.id !== scanId),
+        totalScans: Math.max(0, prev.totalScans - 1),
+      }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete scan record.');
+    }
+  };
 
   const quickActions = [
     { label: 'URL Scanner', path: '/scan/url', icon: <Link size={24} style={{ color: 'var(--danger)' }} /> },
@@ -211,7 +227,28 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <ChevronRight size={16} style={{ color: 'var(--text-disabled)' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <button
+                        onClick={(e) => handleDeleteScan(e, scan.id)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--text-disabled)',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                        }}
+                        className="delete-scan-btn"
+                        title="Delete Scan Record"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <ChevronRight size={16} style={{ color: 'var(--text-disabled)' }} />
+                    </div>
                   </div>
                 ))
               ) : (

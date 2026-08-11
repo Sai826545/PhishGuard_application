@@ -36,7 +36,7 @@ const History = () => {
     if (!window.confirm('Are you sure you want to delete this scan record?')) return;
     try {
       await api.delete(`/history/${id}`);
-      setHistory((prev) => prev.filter((item) => item.id !== id));
+      setHistory((prev) => prev.filter((item) => item.historyId !== id));
     } catch (err) {
       alert('Failed to delete scan record.');
     }
@@ -157,7 +157,7 @@ const History = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {filteredHistory.map((item) => (
             <div
-              key={item.id}
+              key={item.historyId}
               onClick={() => handleCardClick(item)}
               style={{
                 display: 'flex',
@@ -223,7 +223,7 @@ const History = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <button
-                  onClick={(e) => handleDelete(item.id, e)}
+                  onClick={(e) => handleDelete(item.historyId, e)}
                   style={{
                     background: 'transparent',
                     border: 'none',

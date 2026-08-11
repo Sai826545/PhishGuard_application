@@ -125,140 +125,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ).animate().fadeIn(delay: 100.ms),
 
-                // Appearance
-                _SettingsSection(
-                  title: 'Appearance',
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.dark_mode_outlined,
-                      title: AppStrings.darkMode,
-                      subtitle: 'Dark cybersecurity theme',
-                      trailing: Switch(
-                        value: _darkMode,
-                        onChanged: (v) {
-                          setState(() => _darkMode = v);
-                          _updateSetting('darkMode', v);
-                        },
-                      ),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 150.ms),
-
-                // Security
-                _SettingsSection(
-                  title: 'Security',
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.fingerprint,
-                      title: AppStrings.biometricLogin,
-                      subtitle: 'Use fingerprint to unlock',
-                      iconColor: AppColors.primary,
-                      trailing: Switch(
-                        value: _biometric,
-                        onChanged: (v) {
-                          setState(() => _biometric = v);
-                          _updateSetting('biometricLogin', v);
-                        },
-                      ),
-                    ),
-                    _SettingsTile(
-                      icon: Icons.sms_outlined,
-                      title: 'Auto-scan SMS',
-                      subtitle: 'Automatically scan incoming SMS',
-                      iconColor: AppColors.warning,
-                      trailing: Switch(
-                        value: _autoScan,
-                        onChanged: (v) {
-                          setState(() => _autoScan = v);
-                          _updateSetting('autoScanSms', v);
-                        },
-                      ),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 200.ms),
-
-                // Notifications
-                _SettingsSection(
-                  title: 'Notifications',
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.notifications_outlined,
-                      title: AppStrings.notifications,
-                      subtitle: 'Threat alerts and security tips',
-                      trailing: Switch(
-                        value: _notifications,
-                        onChanged: (v) {
-                          setState(() => _notifications = v);
-                          _updateSetting('notificationsEnabled', v);
-                        },
-                      ),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 250.ms),
-
-                // Language
-                _SettingsSection(
-                  title: 'Language',
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.language,
-                      title: AppStrings.language,
-                      subtitle: data['language'] as String? ?? 'en',
-                      trailing: DropdownButton<String>(
-                        value: data['language'] as String? ?? 'en',
-                        dropdownColor: AppColors.card,
-                        style: const TextStyle(color: AppColors.textPrimary),
-                        underline: const SizedBox(),
-                        items: const [
-                          DropdownMenuItem(value: 'en', child: Text('English')),
-                          DropdownMenuItem(value: 'hi', child: Text('हिंदी')),
-                          DropdownMenuItem(value: 'ta', child: Text('தமிழ்')),
-                          DropdownMenuItem(value: 'te', child: Text('తెలుగు')),
-                          DropdownMenuItem(value: 'bn', child: Text('বাংলা')),
-                          DropdownMenuItem(value: 'mr', child: Text('मराठी')),
-                        ],
-                        onChanged: (v) {
-                          if (v != null) {
-                            _updateSetting('language', v);
-                            ref.refresh(settingsDataProvider);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 300.ms),
-
-                // Privacy
-                _SettingsSection(
-                  title: 'Privacy',
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.analytics_outlined,
-                      title: 'Share Anonymous Data',
-                      subtitle: 'Help improve threat detection',
-                      trailing: Switch(
-                        value: _shareData,
-                        onChanged: (v) {
-                          setState(() => _shareData = v);
-                          _updateSetting('shareAnonymousData', v);
-                        },
-                      ),
-                    ),
-                    _SettingsTile(
-                      icon: Icons.delete_outline,
-                      title: AppStrings.clearHistory,
-                      subtitle: 'Remove all scan records',
-                      iconColor: AppColors.danger,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Feature coming soon.')),
-                        );
-                      },
-                      trailing: const Icon(Icons.chevron_right, color: AppColors.textDisabled),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 350.ms),
-
                 // About
                 _SettingsSection(
                   title: 'About',
@@ -277,7 +143,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       trailing: const Icon(Icons.chevron_right, color: AppColors.textDisabled),
                     ),
                   ],
-                ).animate().fadeIn(delay: 400.ms),
+                ).animate().fadeIn(delay: 200.ms),
 
                 const SizedBox(height: AppSizes.paddingMD),
 

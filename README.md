@@ -102,3 +102,51 @@ To run PhishGuard, we recommend starting the services in the following order:
     ```bash
     flutter run
     ```
+
+---
+
+## 🧪 How to Run the Test Suites
+
+We have built automated validation scripts written in Python to audit the entire ecosystem. Each script generates a professionally styled, color-themed Excel report of the results.
+
+Before running the tests, ensure you have installed the test runner dependencies in the root folder:
+```bash
+pip install -r requirements.txt
+```
+
+### 1. 💻 Web UI/UX Selenium Tests (`run_web_tests.py`)
+Runs automated Selenium Webdriver tests to audit browser routing, dashboard components, scan forms, and delete dialogs on the React web client.
+* **Target Application URL**: `http://localhost:5173`
+* **Execution Command**:
+  ```bash
+  C:\Users\achyu\AppData\Local\Programs\Python\Python314\python.exe run_web_tests.py
+  ```
+* **Output Report**: `phishguard_web_test_report.xlsx` (Deep Blue Theme)
+
+### 2. 📱 Mobile UI/UX Appium Tests (`run_mobile_tests.py`)
+Runs automated Appium mobile drivers to verify login cards, dashboard widgets, and scan history screens on active emulators.
+* **Target Emulator/Device**: Android Emulator or iOS Simulator
+* **Execution Command**:
+  ```bash
+  C:\Users\achyu\AppData\Local\Programs\Python\Python314\python.exe run_mobile_tests.py
+
+  ```
+* **Output Report**: `phishguard_test_report.xlsx` (Violet Theme)
+
+### 3. ⚡ Backend API Load & Stress Tests (`run_load_tests.py`)
+Generates 350+ unique concurrent stress request threads scaling from **1 to 100 concurrent users** to measure endpoint latency, DB connections, and Tomcat limits.
+* **Target API URL**: `http://localhost:8081`
+* **Execution Command**:
+  ```bash
+  C:\Users\achyu\AppData\Local\Programs\Python\Python314\python.exe run_load_tests.py
+  ```
+* **Output Report**: `phishguard_load_test_report.xlsx` (Steel Blue Theme)
+
+### 4. 🛡️ Security Vulnerability Audits (`run_vulnerability_tests.py`)
+Fuzzer script executing 350 unique SQL Injection, Cross-Site Scripting (XSS), BOLA/IDOR account authorization, and JWT tampering probes to verify security controls.
+* **Target API URL**: `http://localhost:8081`
+* **Execution Command**:
+  ```bash
+  C:\Users\achyu\AppData\Local\Programs\Python\Python314\python.exe run_vulnerability_tests.py
+  ```
+* **Output Report**: `phishguard_vulnerability_test_report.xlsx` (Emerald Green Theme)

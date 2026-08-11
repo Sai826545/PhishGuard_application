@@ -21,7 +21,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: selenium-web-report
-          path: phishguard_web_test_report.xlsx
+          path: phishguard_web_selenium_test_report.xlsx
 
   appium-tests:
     name: Appium — Android Tests (350+)
