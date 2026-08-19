@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import {
   LayoutDashboard,
   ShieldAlert,
@@ -17,6 +18,24 @@ const MainShell = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [securityScore, setSecurityScore] = useState(user?.securityScore ?? 100);
+
+  useEffect(() => {
+    const fetchScore = async () => {
+      try {
+        const response = await api.get('/profile');
+        setSecurityScore(response.data.data.securityScore ?? 75);
+      } catch (err) {
+        // Fallback
+        setSecurityScore(75);
+      }
+    };
+    if (user) {
+      fetchScore();
+    }
+  }, [user, location.pathname]);
+
+  const scoreColor = securityScore >= 70 ? 'var(--safe)' : securityScore >= 40 ? 'var(--warning)' : 'var(--danger)';
 
   const menuItems = [
     { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
@@ -169,10 +188,10 @@ const MainShell = ({ children }) => {
                 style={{
                   fontSize: '13px',
                   fontWeight: '700',
-                  color: 'var(--safe)',
+                  color: scoreColor,
                 }}
               >
-                {user?.securityScore ?? 100}%
+                {securityScore}%
               </span>
             </div>
           </div>

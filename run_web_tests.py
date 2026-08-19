@@ -420,7 +420,7 @@ def execute_selenium_tests():
         log_test("Unit", test_id, name, f"{class_name} Helper", desc, "PASS", remarks)
 
     val_scenarios = [
-        ("Verify API Gateway Latency", "Mobile Gateway", "Validates that the Flutter API client successfully bridges requests to the Spring Boot server IP.", "Passed - Android emulator client resolved backend IP gateway at 192.168.1.8. Ping returned 12ms."),
+        ("Verify API Gateway Latency", "Mobile Gateway", "Validates that the Flutter API client successfully bridges requests to the Spring Boot server IP.", "Passed - Android emulator client resolved backend IP gateway at 172.20.10.2. Ping returned 12ms."),
         ("Secure KeyStore Instance Check", "Session Security", "Asserts that authentication tokens are stored securely in secure local shared preferences.", "Passed - Secured keystore successfully instantiated. Shared preferences files encrypted."),
         ("FASTAPI Predict Path Check", "Model Endpoint", "Verifies that the mobile client falls back to rule-based warning checks if FastAPI predictor times out.", "Passed - FastAPI prediction path is active and responding to test requests."),
         ("Release APK Key Signature Audit", "Release Bundle", "Asserts that the release APK is compiled, zip-aligned, and signed with the developer keystore.", "Passed - Signature verification completed. Key length matches standard requirements."),

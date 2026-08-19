@@ -88,7 +88,7 @@ To run PhishGuard, we recommend starting the services in the following order:
 
 > [!IMPORTANT]
 > When testing on a **physical device** or **Android Emulator**, local host mapping changes.
-> Open `lib/core/network/api_client.dart` in the mobile app and configure your computer's local network IP address (e.g., `192.168.1.8`) to bridge connection calls to your local Spring Boot server.
+> Open `lib/core/network/api_client.dart` in the mobile app and configure your computer's local network IP address (e.g., `172.20.10.2`) to bridge connection calls to your local Spring Boot server.
 
 1.  Navigate to the mobile directory:
     ```bash

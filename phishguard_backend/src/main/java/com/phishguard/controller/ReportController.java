@@ -2,6 +2,8 @@ package com.phishguard.controller;
 
 import com.phishguard.dto.request.ReportRequest;
 import com.phishguard.dto.response.ApiResponse;
+import com.phishguard.dto.response.AuthResponse;
+import com.phishguard.dto.response.PublicReportResponse;
 import com.phishguard.model.ScamReport;
 import com.phishguard.service.ReportService;
 import jakarta.validation.Valid;
@@ -62,5 +64,11 @@ public class ReportController {
     public ResponseEntity<ApiResponse<List<ScamReport>>> getMyReports() {
         return ResponseEntity.ok(ApiResponse.success(
                 reportService.getUserReports(), "Reports retrieved."));
+    }
+
+    @GetMapping("/community")
+    public ResponseEntity<ApiResponse<List<PublicReportResponse>>> getCommunityReports() {
+        return ResponseEntity.ok(ApiResponse.success(
+                reportService.getAllPublicReports(), "Community reports feed retrieved."));
     }
 }

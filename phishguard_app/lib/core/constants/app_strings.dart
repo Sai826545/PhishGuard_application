@@ -101,7 +101,7 @@ class AppStrings {
   static const String weakPassword = 'Password must be at least 6 characters';
 
   // API
-  static const String baseUrl = 'http://192.168.1.8:8081/api';
+  static const String baseUrl = 'http://localhost:8081/api';
 }
 
 class AppSizes {

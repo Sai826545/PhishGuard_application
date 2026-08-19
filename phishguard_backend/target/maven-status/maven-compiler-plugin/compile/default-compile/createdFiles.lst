@@ -1,6 +1,7 @@
 com\phishguard\model\ScamReport$Status.class
 com\phishguard\controller\DashboardController.class
 com\phishguard\engine\DetectionEngine.class
+com\phishguard\dto\response\PublicReportResponse.class
 com\phishguard\controller\ProfileController.class
 com\phishguard\engine\SslChecker.class
 com\phishguard\repository\BlacklistedDomainRepository.class
@@ -80,6 +81,7 @@ com\phishguard\model\Alert$AlertBuilder.class
 com\phishguard\model\ScanHistory.class
 com\phishguard\model\User.class
 com\phishguard\exception\ResourceNotFoundException.class
+com\phishguard\dto\response\PublicReportResponse$PublicReportResponseBuilder.class
 com\phishguard\exception\BadRequestException.class
 com\phishguard\controller\DashboardController$DashboardStats.class
 com\phishguard\dto\request\SignupRequest.class

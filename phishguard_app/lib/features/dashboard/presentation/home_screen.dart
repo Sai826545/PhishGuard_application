@@ -123,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
                 data: (data) => SliverList(
                   delegate: SliverChildListDelegate([
                     _SecurityScoreCard(
-                      score: data['securityScore'] as int? ?? 75,
+                      score: data['securityScore'] as int? ?? 100,
                       totalScans: data['totalScans'] as int? ?? 0,
                       blockedThreats: data['blockedThreats'] as int? ?? 0,
                     ),

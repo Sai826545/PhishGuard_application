@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ScamReportRepository extends JpaRepository<ScamReport, Long> {
     List<ScamReport> findByUserIdOrderByReportedAtDesc(Long userId);
+    List<ScamReport> findAllByOrderByReportedAtDesc();
 }

@@ -53,7 +53,7 @@ const Profile = () => {
     );
   }
 
-  const score = profile.securityScore ?? 75;
+  const score = profile.securityScore ?? 100;
   const scoreColor = score >= 70 ? 'var(--safe)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
   const scoreLabel = score >= 70 ? '🟢 Excellent Protection' : score >= 40 ? '🟡 Moderate Risk' : '🔴 High Risk';
 

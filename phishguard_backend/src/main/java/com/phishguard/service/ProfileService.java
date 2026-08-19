@@ -56,7 +56,7 @@ public class ProfileService {
     }
 
     private int computeSecurityScore(long scans, long threats) {
-        if (scans == 0) return 75;
+        if (scans == 0) return 100;
         double safeRatio = 1.0 - ((double) threats / scans);
         return (int) Math.min(100, Math.max(0, safeRatio * 100));
     }

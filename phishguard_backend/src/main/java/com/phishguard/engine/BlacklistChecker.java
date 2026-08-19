@@ -8,10 +8,13 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class BlacklistChecker {
 
     private final BlacklistedDomainRepository blacklistedDomainRepository;
+
+    public BlacklistChecker(BlacklistedDomainRepository blacklistedDomainRepository) {
+        this.blacklistedDomainRepository = blacklistedDomainRepository;
+    }
 
     // In-memory high-priority blacklist for fast lookup
     private static final List<String> HIGH_PRIORITY_DOMAINS = Arrays.asList(

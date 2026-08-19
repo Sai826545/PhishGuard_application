@@ -52,6 +52,7 @@ C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\model\User.java
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\model\UserSettings.java
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\service\ReportService.java
+C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\dto\response\PublicReportResponse.java
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\engine\SslChecker.java
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\engine\RdapService.java
 C:\Users\achyu\Desktop\Projects\PhishGuard\phishguard_backend\src\main\java\com\phishguard\engine\DetectionResult.java

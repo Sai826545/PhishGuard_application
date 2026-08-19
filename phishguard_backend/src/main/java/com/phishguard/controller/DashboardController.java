@@ -42,7 +42,7 @@ public class DashboardController {
         long blockedThreats = scanHistoryRepository.countBlockedThreats(user.getId());
 
         // Security score
-        int securityScore = totalScans == 0 ? 75
+        int securityScore = totalScans == 0 ? 100
                 : (int) Math.min(100, (1.0 - (double) blockedThreats / totalScans) * 100);
 
         // Recent scans

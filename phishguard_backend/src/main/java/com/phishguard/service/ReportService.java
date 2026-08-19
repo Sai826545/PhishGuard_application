@@ -1,6 +1,7 @@
 package com.phishguard.service;
 
 import com.phishguard.dto.request.ReportRequest;
+import com.phishguard.dto.response.PublicReportResponse;
 import com.phishguard.exception.BadRequestException;
 import com.phishguard.model.ScamReport;
 import com.phishguard.model.User;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -49,6 +51,12 @@ public class ReportService {
                 .build();
 
         return scamReportRepository.save(report);
+    }
+
+    public List<PublicReportResponse> getAllPublicReports() {
+        return scamReportRepository.findAllByOrderByReportedAtDesc().stream()
+                .map(PublicReportResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     public List<ScamReport> getUserReports() {

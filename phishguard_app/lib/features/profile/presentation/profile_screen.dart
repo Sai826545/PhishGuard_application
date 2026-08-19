@@ -114,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                         Container(height: 40, width: 1, color: AppColors.border),
                         _StatBox(
                           label: 'Score',
-                          value: '${profile['securityScore'] ?? 75}%',
+                          value: '${profile['securityScore'] ?? 100}%',
                           icon: Icons.security_outlined,
                           color: AppColors.safe,
                         ),
@@ -127,7 +127,7 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 20),
 
               // Security score bar
-              _SecurityBar(score: profile['securityScore'] as int? ?? 75),
+              _SecurityBar(score: profile['securityScore'] as int? ?? 100),
 
               const SizedBox(height: 20),
 

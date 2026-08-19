@@ -39,6 +39,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       appBar: AppBar(
         title: const Text(AppStrings.history),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh history',
+            onPressed: () => ref.refresh(historyProvider(_filter)),
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.filter_list),
             color: AppColors.card,
